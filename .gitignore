@@ -1,14 +1,3 @@
-# IntelliJ IDEA files
 .idea/
 out/
 *.iml
-
-# Package files
-*.jar
-*.war
-*.ear
-
-
-# Compiled class files
-*.class.DS_Store
-.DS_Store
