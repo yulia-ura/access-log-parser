@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Scanner;
 
-
 class VeryLongLineException extends RuntimeException {
     public VeryLongLineException(String message) {
         super(message);
@@ -39,9 +38,8 @@ public class Main {
             System.out.println("Это файл номер " + correctFileCount);
 
             int lineCounter = 0;
-            int longestLine = 0;
-            int shortestLine = Integer.MAX_VALUE;
-
+            int googleBotCount = 0;
+            int yandexBotCount = 0;
 
             try {
                 FileReader fileReader = new FileReader(path);
@@ -53,25 +51,46 @@ public class Main {
                     if (length > 1024) {
                         throw new VeryLongLineException("Строка превышает 1024 символа");
                     }
-
                     lineCounter ++;
 
-                    if (length > longestLine) {
-                        longestLine = length;
-                    }
+                    String[] parts = line.split("\"");
+                    if (parts.length >= 5) {
+                        String userAgent = parts[parts.length - 1];
 
-                    if (length < shortestLine) {
-                        shortestLine = length;
+                        int start = userAgent.indexOf("(compatible;");
+                        int end = userAgent.indexOf(")", start);
+
+                        if (start != -1 && end != -1 && end > start) {
+                            String firstBrackets = userAgent.substring(start + 1, end);
+
+                            String[] subParts = firstBrackets.split(";");
+
+                            if (subParts.length >= 2) {
+                                String fragment = subParts[1].trim();
+                                String[] slashParts = fragment.split("/");
+
+                                if (slashParts.length > 0) {
+                                    String searchBot = slashParts[0].trim();
+
+                                    if (searchBot.equals("Googlebot")) {
+                                        googleBotCount++;
+                                    } else if (searchBot.equals("YandexBot")) {
+                                        yandexBotCount++;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 reader.close();
+
             } catch (Exception ex) {
                     ex.printStackTrace();
-                }
+            }
 
             System.out.println("Общее количество строк в файле: " + lineCounter);
-            System.out.println("Длина самой длинной строки в файле: " + longestLine);
-            System.out.println("Длина самой короткой строки в файле: " + shortestLine);
+            System.out.println("Доля Googlebot: " + (googleBotCount * 100.0) / lineCounter + "%");
+            System.out.println("Доля YandexBot: " + ((yandexBotCount * 100.0) / lineCounter) + "%");
             }
         }
     }
