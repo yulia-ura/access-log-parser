@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Scanner;
 
+// Исключение для строк длиннее 1024 символов (Задание #1)
 class VeryLongLineException extends RuntimeException {
     public VeryLongLineException(String message) {
         super(message);
@@ -14,10 +15,13 @@ public class Main {
 
         int correctFileCount = 0;
 
+        // Основной цикл программы - обработка нескольких файлов
         while (true) {
+            // Ввод пути к файлу
             System.out.println("Введите путь к файлу: ");
             String path = new Scanner(System.in).nextLine();
 
+            // Проверка существования файла и что это не папка
             File file = new File(path);
             boolean fileExists = file.exists();
 
@@ -33,26 +37,39 @@ public class Main {
                 continue;
             }
 
+            // Файл корректен, начинаем обработку
             System.out.println("Путь указан верно");
             correctFileCount++;
             System.out.println("Это файл номер " + correctFileCount);
 
-            int lineCounter = 0;
-            int googleBotCount = 0;
-            int yandexBotCount = 0;
+            // Переменные для статистики
+            int lineCounter = 0; // Общее количество строк
+            int googleBotCount = 0; // Счетчик Googlebot (Задание #2)
+            int yandexBotCount = 0; // Счетчик YandexBot (Задание #2)
+
+            Statistics statistics = new Statistics();// Для статистики трафика (Задание #3)
 
             try {
+                // Открытие и чтение файла
                 FileReader fileReader = new FileReader(path);
                 BufferedReader reader = new BufferedReader(fileReader);
                 String line;
+
+                // Построчная обработка файла
                 while ((line = reader.readLine()) != null) {
                     int length = line.length();
 
+                    // Проверка длины строки (Задание #1)
                     if (length > 1024) {
                         throw new VeryLongLineException("Строка превышает 1024 символа");
                     }
-                    lineCounter ++;
+                    lineCounter++;
 
+                    // Создание LogEntry и сбор статистики трафика (Задание #3)
+                    LogEntry entry = new LogEntry(line);
+                    statistics.addEntry(entry);
+
+                    // Анализ User-Agent для поиска поисковых ботов (Задание #2)
                     String[] parts = line.split("\"");
                     if (parts.length >= 5) {
                         String userAgent = parts[parts.length - 1];
@@ -85,12 +102,21 @@ public class Main {
                 reader.close();
 
             } catch (Exception ex) {
-                    ex.printStackTrace();
+                ex.printStackTrace();
             }
 
+            // Вывод результатов
             System.out.println("Общее количество строк в файле: " + lineCounter);
-            System.out.println("Доля Googlebot: " + (googleBotCount * 100.0) / lineCounter + "%");
-            System.out.println("Доля YandexBot: " + ((yandexBotCount * 100.0) / lineCounter) + "%");
+
+            if (lineCounter > 0) {
+                System.out.println("Доля Googlebot: " + (googleBotCount * 100.0) / lineCounter + "%");
+                System.out.println("Доля YandexBot: " + ((yandexBotCount * 100.0) / lineCounter) + "%");
+            } else {
+                System.out.println("Файл пуст, доли ботов не вычислены");
             }
+
+            // Вывод средней скорости трафика (Задание #3)
+            System.out.println("Средняя скорость трафика: " + statistics.getTrafficRate() + " байт/час");
         }
     }
+}
