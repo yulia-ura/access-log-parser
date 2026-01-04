@@ -135,12 +135,33 @@ public class Main {
                 System.out.println("  Нет данных об операционных системах");
             } else {
                 for (Map.Entry<String, Double> entry : osStats.entrySet()) {
-                    // Форматируем вывод: 0.6 -> 60.00%
                     double percentage = entry.getValue() * 100;
                     System.out.printf("  %-10s: %.2f%%\n", entry.getKey(), percentage);
                 }
             }
-
+            // Вывод несуществующих страниц (404)
+            Set<String> notFoundPages = statistics.getNotFoundPages();
+            System.out.println("\nНесуществующие страницы (код 404):");
+            if (notFoundPages.isEmpty()) {
+                System.out.println("  Страниц с кодом 404 не обнаружено");
+            } else {
+                System.out.println("  Всего: " + notFoundPages.size());
+                System.out.println("  Список страниц:");
+                for (String page : notFoundPages) {
+                    System.out.println("    - " + page);
+                }
+            }
+            // Вывод статистики браузеров
+            Map<String, Double> browserStats = statistics.getBrowserStatistics();
+            System.out.println("\nСтатистика браузеров:");
+            if (browserStats.isEmpty()) {
+                System.out.println("  Нет данных о браузерах");
+            } else {
+                for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
+                    double percentage = entry.getValue() * 100;
+                    System.out.printf("  %-20s: %.2f%%\n", entry.getKey(), percentage);
+                }
+            }
         }
     }
 }

@@ -10,6 +10,8 @@ public class Statistics {
     private LocalDateTime maxTime;
     private Set<String> existingPages;
     private Map<String, Integer> osCounts;
+    private Set<String> notFoundPages;
+    private Map<String, Integer> browserCounts;
 
     public Statistics() {
         this.totalTraffic = 0;
@@ -17,6 +19,8 @@ public class Statistics {
         this.maxTime = LocalDateTime.MIN;
         this.existingPages = new HashSet<>();
         this.osCounts = new HashMap<>();
+        this.notFoundPages = new HashSet<>();
+        this.browserCounts = new HashMap<>();
     }
 
     public void addEntry(LogEntry entry) {
@@ -35,8 +39,15 @@ public class Statistics {
             existingPages.add(entry.getPath());
         }
 
+        if (entry.getResponseCode() == 404) {
+            notFoundPages.add(entry.getPath());
+        }
+
         String os = entry.getUserAgent().getOsType();
         osCounts.put(os, osCounts.getOrDefault(os, 0) + 1);
+
+        String browser = entry.getUserAgent().getBrowser();
+        browserCounts.put(browser, browserCounts.getOrDefault(browser, 0) + 1);
     }
 
     public double getTrafficRate() {
@@ -72,4 +83,29 @@ public class Statistics {
         }
         return result;
     }
-}
+
+    public Set<String> getNotFoundPages() {
+        return notFoundPages;
+    }
+
+    public Map<String, Double> getBrowserStatistics() {
+        Map<String, Double> result = new HashMap<>();
+
+        int total = 0;
+        for (int count : browserCounts.values()) {
+            total += count;
+        }
+
+        if (total == 0) {
+            return result;
+        }
+
+        for (Map.Entry<String, Integer> entry : browserCounts.entrySet()) {
+            String browser = entry.getKey();
+            int count = entry.getValue();
+            double share = (double) count / total;
+            result.put(browser, share);
+        }
+        return result;
+    }
+    }
