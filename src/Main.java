@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 // Исключение для строк длиннее 1024 символов (Задание #1)
 class VeryLongLineException extends RuntimeException {
@@ -117,6 +119,28 @@ public class Main {
 
             // Вывод средней скорости трафика (Задание #3)
             System.out.println("Средняя скорость трафика: " + statistics.getTrafficRate() + " байт/час");
+
+            // Вывод уникальных страниц с кодом 200
+            Set<String> existingPages = statistics.getExistingPages();
+            System.out.println("Уникальных страниц с кодом 200: " + existingPages.size());
+            System.out.println("Список страниц:");
+            for (String page : existingPages) {
+                System.out.println("  - " + page);
+            }
+
+            // Вывод статистики операционных систем
+            Map<String, Double> osStats = statistics.getOsStatistics();
+            System.out.println("\nСтатистика операционных систем:");
+            if (osStats.isEmpty()) {
+                System.out.println("  Нет данных об операционных системах");
+            } else {
+                for (Map.Entry<String, Double> entry : osStats.entrySet()) {
+                    // Форматируем вывод: 0.6 -> 60.00%
+                    double percentage = entry.getValue() * 100;
+                    System.out.printf("  %-10s: %.2f%%\n", entry.getKey(), percentage);
+                }
+            }
+
         }
     }
 }
