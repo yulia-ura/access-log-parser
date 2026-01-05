@@ -1,8 +1,10 @@
 public class UserAgent {
     final String osType;
     final String browser;
+    final String userAgentString;
 
     public UserAgent(String userAgentString) {
+        this.userAgentString = userAgentString;
 
 
         // Определение ОС
@@ -38,5 +40,13 @@ public class UserAgent {
 
     public String getBrowser() {
         return browser;
+    }
+
+    public boolean isBot() {
+        if (userAgentString == null) {
+            return false;
+        }
+        String userAgentLower = userAgentString.toLowerCase();
+        return userAgentLower.contains("bot");
     }
 }
