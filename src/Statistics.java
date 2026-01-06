@@ -1,6 +1,7 @@
 import java.time.LocalDateTime;
 import java.util.*;
 
+
 public class Statistics {
     private int totalTraffic;
     private long totalVisits;
@@ -215,5 +216,56 @@ public class Statistics {
                     return 0.0;
                 }
                 return (double) totalNonBotVisits / uniqueUsers;
+    }
+
+    public  int calculatePeakVisitsPerSecond() {
+        return allEntries.stream()
+                .filter(entry-> !entry.getUserAgent().isBot())
+                .collect(java.util.stream.Collectors.groupingBy(
+                        entry -> entry.getDateTime().withNano(0),
+                        java.util.stream.Collectors.counting()
+                ))
+                .values()
+                .stream()
+                .mapToInt(Long::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    public Set<String> getRefererDomains() {
+        return allEntries.stream()
+                .map(LogEntry::getReferer)
+                .filter(Objects::nonNull)
+                .filter(ref -> !ref.isEmpty() && !ref.equals("-"))
+                .map(this::extractDomain)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private String extractDomain(String url) {
+        try {
+            java.net.URI uri = new java.net.URI(url);
+            String host = uri.getHost();
+            if (host != null && host.startsWith("www.")) {
+                host = host.substring(4);
+            }
+            return host;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public int calculateMaxVisitsBySingleUser() {
+        return allEntries.stream()
+                .filter(entry-> !entry.getUserAgent().isBot())
+                .collect(java.util.stream.Collectors.groupingBy(
+                        LogEntry::getIpAddress,
+                        java.util.stream.Collectors.counting()
+                ))
+                .values()
+                .stream()
+                .mapToInt(Long::intValue)
+                .max()
+                .orElse(0);
     }
     }
